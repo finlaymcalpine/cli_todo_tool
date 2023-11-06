@@ -3,14 +3,24 @@ mod cli;
 mod tasks;
 
 use cli::{Action::*, Arguments};
+use std::path::PathBuf;
 use tasks::Task;
+
+fn assign_default_file() -> Option<PathBuf> {
+    home::home_dir().map(|mut path| {
+        path.push(".rust_journal.json");
+        path
+    })
+}
 
 fn main() {
     // Get the command-line arguments.
     let Arguments { action, task_file } = Arguments::parse();
 
     // Unpack the journal file.
-    let file_path = task_file.expect("Failed to find journal file");
+    let file_path = task_file
+        .or_else(assign_default_file)
+        .expect("Failed to find journal file");
 
     // Perform the action.
     match action {
